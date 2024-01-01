@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 interface PaymentStatus {
   status: 'success' | 'failure' | null;
@@ -45,8 +45,11 @@ function PaymentComponent(){
       const rupeesVoice = new SpeechSynthesisUtterance('Payment Successful. Rupees ');
       const amountVoice = new SpeechSynthesisUtterance(transactionAmount);
 
-      rupeesVoice.voice = synth.getVoices().find(voice => voice.name.includes('English India'));
-      amountVoice.voice = synth.getVoices().find(voice => voice.name.includes('your-preferred-amount-voice'));
+      const voices = synth.getVoices();
+      const englishIndiaVoice = voices.find(voice => voice.name.includes('English India'));
+      const amountVoicePreference = voices.find(voice => voice.name.includes('your-preferred-amount-voice'));
+rupeesVoice.voice = englishIndiaVoice || voices[0]; // Fallback to the first voice if not found
+amountVoice.voice = amountVoicePreference || voices[1]; // Fallback to the second voice if not found
 
       rupeesVoice.onend = () => {
         synth.speak(amountVoice);
@@ -74,10 +77,11 @@ function PaymentComponent(){
               Pay
           </button>
           {paymentStatus.status === 'success' && (
-            <p>
-              Payment successful! Rupees ${paymentStatus.amount}
-            </p>
-          )}
+  <p>
+    Payment successful! Rupees ${paymentStatus.amount?.toString()}
+  </p>
+)}
+
         </div>
       </div>
     </div>
